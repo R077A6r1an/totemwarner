@@ -23,14 +23,14 @@
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"totemwarner.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "totemwarner.client.mixins.json",
 			"environment": "client"
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.19.3",
+		"fabricloader": ">=0.18.6",
 		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*"

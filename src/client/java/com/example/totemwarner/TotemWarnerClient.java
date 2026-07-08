@@ -51,30 +51,6 @@ public class TotemWarnerClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> WarnerState.resetForNewSession());
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WarnerState.resetForNewSession());
 
-		// Refuse end-crystal hits when there is no totem in either hand. Always
-		// active, even if you have never held a totem this session.
-		AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
-			if (!level.isClientSide()) {
-				return InteractionResult.PASS; // only act on the client
-			}
-			if (!(entity instanceof EndCrystal)) {
-				return InteractionResult.PASS;
-			}
-			boolean totemInHands =
-					player.getMainHandItem().is(Items.TOTEM_OF_UNDYING)
-							|| player.getOffhandItem().is(Items.TOTEM_OF_UNDYING);
-			if (totemInHands) {
-				return InteractionResult.PASS; // safe -> allow the hit
-			}
-			// Block it: cancel the attack, flash, buzz, and warn.
-			WarnerState.lastCrystalBlockMs = System.currentTimeMillis();
-			playSound(SoundEvents.NOTE_BLOCK_BASS, 0.7f, 0.7f);
-			Minecraft.getInstance().gui.setOverlayMessage(
-					Component.literal("Crystal hit blocked - no totem in hand!")
-							.withStyle(ChatFormatting.RED, ChatFormatting.BOLD), false);
-			return InteractionResult.FAIL; // cancels client-side; no attack packet sent
-		});
-
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 
 		// HudRenderCallback is deprecated (replaced by HudElementRegistry) but is
