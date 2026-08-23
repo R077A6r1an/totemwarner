@@ -3,30 +3,28 @@ package com.example.totemwarner;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
-import org.lwjgl.glfw.GLFW;
 
 /**
- * Mojang-mappings (Mojmap) build for Minecraft 1.21.11.
- * As of 1.21.11 the Fabric default switched from Yarn to official Mojang names.
+ * Mojang-mappings (Mojmap) build for Minecraft 26.1.2.
+ * As of 26.1.2 the Fabric default switched from Yarn to official Mojang names.
  */
 public class TotemWarnerClient implements ClientModInitializer {
+
+	// Match this to the id in your fabric.mod.json.
+	public static final String MOD_ID = "totem-warner";
 
 	// ----- Tunable knobs -----------------------------------------------------
 	private static final long REMINDER_SOUND_INTERVAL_MS = 1500; // gentle nag
@@ -35,32 +33,43 @@ public class TotemWarnerClient implements ClientModInitializer {
 
 	private static KeyMapping dismissKey;
 
+	// Used to detect entering a world (per-session reset without extra events).
+	private boolean hadPlayer = false;
+
 	@Override
 	public void onInitializeClient() {
-		// Dismiss / snooze key. Silences the CURRENT warning until its severity
-		// changes, so you can keep playing in a clutch without the overlay.
-		dismissKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+		// 26.1: key mappings take a registered Category object, not a String.
+		KeyMapping.Category category = KeyMapping.Category.register(
+				Identifier.fromNamespaceAndPath(MOD_ID, "main"));
+
+		dismissKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.totemwarner.dismiss",
 				InputConstants.Type.KEYSYM,
-				GLFW.GLFW_KEY_V,
-				KeyMapping.Category.GAMEPLAY
+				InputConstants.KEY_V,
+				category
 		));
-
-		// Reset per server / per world: the offhand reminder only arms after you
-		// pick up your first totem of the session.
-		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> WarnerState.resetForNewSession());
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WarnerState.resetForNewSession());
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 
-		// HudRenderCallback is deprecated (replaced by HudElementRegistry) but is
-		// still present and works in 1.21.11. See README for the modern migration.
-		HudRenderCallback.EVENT.register(TotemWarnerHud::render);
+		// 26.1 HUD API: HudRenderCallback was removed. Register a HudElement that
+		// renders just before the chat layer; the API handles z-ordering.
+		HudElementRegistry.attachElementBefore(
+				VanillaHudElements.CHAT,
+				Identifier.fromNamespaceAndPath(MOD_ID, "totem_warning"),
+				TotemWarnerHud::render);
 	}
 
 	private void onClientTick(Minecraft client) {
 		LocalPlayer player = client.player;
-		if (player == null) {
+
+		// Reset once per session: fires on the transition from no-player
+		// (menu / disconnected) to in-world, i.e. joining a world or server.
+		boolean hasPlayer = player != null;
+		if (hasPlayer && !hadPlayer) {
+			WarnerState.resetForNewSession();
+		}
+		hadPlayer = hasPlayer;
+		if (!hasPlayer) {
 			return;
 		}
 
@@ -69,8 +78,7 @@ public class TotemWarnerClient implements ClientModInitializer {
 			WarnerState.dismissedLevel = WarnerState.level;
 		}
 
-		// getContainerSize()/getItem() span main inventory, armor AND offhand,
-		// so "totem anywhere" really means anywhere.
+		// getContainerSize()/getItem() span main inventory, armor AND offhand.
 		Inventory inv = player.getInventory();
 		boolean totemAnywhere = false;
 		for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -113,16 +121,16 @@ public class TotemWarnerClient implements ClientModInitializer {
 			if (now - WarnerState.lastSoundMs >= interval) {
 				WarnerState.lastSoundMs = now;
 				if (critical) {
-					playSound(SoundEvents.NOTE_BLOCK_BASS, 1.0f, 0.5f);
+					playSound(SoundEvents.NOTE_BLOCK_BASS, 0.5f, 1.0f);  // low + loud
 				} else {
-					playSound(SoundEvents.NOTE_BLOCK_PLING, 0.8f, 1.5f);
+					playSound(SoundEvents.NOTE_BLOCK_PLING, 1.5f, 0.8f); // high ping
 				}
 			}
 		}
 	}
 
-	public static void playSound(Holder<SoundEvent> sound, float volume, float pitch) {
-		// SimpleSoundInstance.forUI args are (sound, pitch, volume).
+	// forUI(sound, pitch, volume). The Holder is accepted directly in 26.1.
+	public static void playSound(Holder<SoundEvent> sound, float pitch, float volume) {
 		Minecraft.getInstance().getSoundManager()
 				.play(SimpleSoundInstance.forUI(sound.value(), pitch, volume));
 	}

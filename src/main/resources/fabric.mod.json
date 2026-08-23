@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "totem-warmer",
+	"id": "totem-warner",
 	"version": "${version}",
 	"name": "Totem Warner",
 	"description": "Warns you about if you have no totem in offhand.",
@@ -30,9 +30,9 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.18.6",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
+		"fabricloader": "*",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
 		"fabric-api": "*"
 	}
 }
