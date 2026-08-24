@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "totem-warner",
+	"version": "${version}",
+	"name": "Totem Warner",
+	"description": "Warns you about if you have no totem in offhand.",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/R077A6r1an/totem-warner"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/totemwarner/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.example.ExampleMod"
+		],
+		"client": [
+			"com.example.totemwarner.TotemWarnerClient"
+		]
+	},
+	"mixins": [
+		"totemwarner.mixins.json",
+		{
+			"config": "totemwarner.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
