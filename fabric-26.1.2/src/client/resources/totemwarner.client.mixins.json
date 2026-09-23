@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.example.totemwarner.mixin",
+	"package": "org.r077a6r1an.totemwarner.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+      "ExampleClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

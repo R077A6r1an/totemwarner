@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "totem-warmer",
+	"id": "totem-warner",
 	"version": "${version}",
 	"name": "Totem Warner",
 	"description": "Warns you about if you have no totem in offhand.",
@@ -19,7 +19,7 @@
 			"org.r077a6r1an.ExampleMod"
 		],
 		"client": [
-			"org.r077a6r1an.totemwarner.TotemWarnerClient"
+          "org.r077a6r1an.totemwarner.TotemWarnerClient"
 		]
 	},
 	"mixins": [
@@ -31,8 +31,8 @@
 	],
 	"depends": {
 		"fabricloader": "*",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
+		"minecraft": "~26.2",
+		"java": ">=25",
 		"fabric-api": "*"
 	}
 }
