@@ -31,7 +31,7 @@ public class TotemWarnerClient implements ClientModInitializer {
 	private static final long CRITICAL_SOUND_INTERVAL_MS = 700;  // urgent nag
 	// -------------------------------------------------------------------------
 
-	private static KeyMapping dismissKey;
+	static KeyMapping dismissKey;
 
 	// Used to detect entering a world (per-session reset without extra events).
 	private boolean hadPlayer = false;

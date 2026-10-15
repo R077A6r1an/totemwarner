@@ -4,6 +4,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 
 /**
  * HUD overlay for 26.1.2. Registered via HudElementRegistry, so the render method
@@ -48,9 +49,10 @@ public final class TotemWarnerHud {
         graphics.fill(w - BORDER, 0, w, h, color);        // right
 
         // Banner near the top.
+        var dismissKey = TotemWarnerClient.dismissKey.getTranslatedKeyMessage();
         Font font = mc.font;
         String head = critical ? "!!! OUT OF TOTEMS !!!" : "!! NO TOTEM IN OFFHAND";
-        String sub  = "press [V] to silence";
+        Component sub  = Component.literal("press [").append( dismissKey).append("] to silence");
 
         int boxW = Math.max(font.width(head), font.width(sub)) + 16;
         int boxH = 28;
@@ -67,9 +69,14 @@ public final class TotemWarnerHud {
 
     // 26.1 replaces drawCenteredString with a unified text(...) method, so we
     // center manually: text(font, string, x, y, argbColor, dropShadow).
-    private static void drawCentered(GuiGraphicsExtractor g, Font font, String text,
+    private static void drawCentered(GuiGraphicsExtractor g, Font font, Component text,
                                      int centerX, int y, int argb) {
         int x = centerX - font.width(text) / 2;
         g.text(font, text, x, y, argb, true);
+    }
+
+    private static void drawCentered(GuiGraphicsExtractor g, Font font, String text,
+                                      int centerX, int y, int argb) {
+        drawCentered(g, font, Component.literal(text), centerX, y, argb);
     }
 }
