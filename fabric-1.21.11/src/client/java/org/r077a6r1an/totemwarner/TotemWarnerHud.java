@@ -1,5 +1,6 @@
 package org.r077a6r1an.totemwarner;
 
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -62,9 +63,10 @@ public final class TotemWarnerHud {
         graphics.fill(w - BORDER, 0, w, h, color);        // right
 
         // Banner near the top.
+        var dismissKey = TotemWarnerClient.dismissKey.getTranslatedKeyMessage();
         Font font = mc.font;
         String head = critical ? "!!! OUT OF TOTEMS !!!" : "!! NO TOTEM IN OFFHAND";
-        String sub  = "press [V] to silence";
+        Component sub  = Component.literal("press [").append( dismissKey).append("] to silence");
 
         int boxW = Math.max(font.width(head), font.width(sub)) + 16;
         int boxH = 28;
@@ -75,6 +77,6 @@ public final class TotemWarnerHud {
                 (boxA << 24) | (critical ? 0x400000 : 0x402800));
 
         graphics.drawCenteredString(font, Component.literal(head), w / 2, by + 5,  0xFFFFFFFF);
-        graphics.drawCenteredString(font, Component.literal(sub),  w / 2, by + 16, 0xFFCFCFCF);
+        graphics.drawCenteredString(font, sub,  w / 2, by + 16, 0xFFCFCFCF);
     }
 }

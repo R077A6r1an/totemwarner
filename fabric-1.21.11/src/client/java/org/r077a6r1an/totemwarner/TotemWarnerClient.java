@@ -28,7 +28,7 @@ public class TotemWarnerClient implements ClientModInitializer {
 	private static final long CRITICAL_SOUND_INTERVAL_MS = 700;  // urgent nag
 	// -------------------------------------------------------------------------
 
-	private static KeyMapping dismissKey;
+	static KeyMapping dismissKey;
 
 	@Override
 	public void onInitializeClient() {
